@@ -1,5 +1,5 @@
 import { getPhotos } from 'apiService/photos';
-import { Form, Text } from 'components';
+import { Button, Form, Loader, PhotosGallery, Text } from 'components';
 import { useEffect, useState } from 'react';
 
 export const Photos = () => {
@@ -27,7 +27,6 @@ export const Photos = () => {
 
         setImages(prevImages => [...prevImages, ...photos]);
         setIsVisible(page < Math.ceil(total_results / per_page));
-        
       } catch (error) {
         setError(error);
       } finally {
@@ -39,11 +38,34 @@ export const Photos = () => {
 
   const onHandleSubmit = value => {
     setQuery(value);
+    setImages([]);
+    setPage(1);
+    setIsEmpty(false);
+    setError(false);
+    setIsVisible(false);
+  };
+  const onHandleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
   return (
     <>
       <Form onSubmit={onHandleSubmit} />
-      <Text textAlign="center">Let`s begin search 🔎</Text>
+      {images.length > 0 && <PhotosGallery images={images} />}
+      {isVisible && (
+        <Button onClick={onHandleLoadMore} disabled={isLoading}>
+          {isLoading ? 'Loading' : 'Load more'}
+        </Button>
+      )}
+      {!images.length && !isEmpty && (
+        <Text textAlign="center">Let`s begin search 🔎</Text>
+      )}
+      {isLoading && <Loader />}
+      {error && (
+        <Text textAlign="center">❌ Something went wrong - {error}</Text>
+      )}
+      {isEmpty && (
+        <Text textAlign="center">Sorry. There are no images ... 😭</Text>
+      )}
     </>
   );
 };
